@@ -1,14 +1,14 @@
 import os
 
 import requests
-from datasets import load_dataset
+from datasets import load_dataset, Value
 
 
 class UnfairClausesDataProvider:
     DATA_URLS = {
         "train": "https://huggingface.co/datasets/laugustyniak/abusive-clauses-pl/resolve/main/train.csv",
         "test": "https://huggingface.co/datasets/laugustyniak/abusive-clauses-pl/resolve/main/test.csv",
-        "validation": "https://huggingface.co/datasets/laugustyniak/abusive-clauses-pl/resolve/main/dev.csv",
+        "val": "https://huggingface.co/datasets/laugustyniak/abusive-clauses-pl/resolve/main/dev.csv",
     }
 
     @staticmethod
@@ -27,9 +27,18 @@ class UnfairClausesDataProvider:
         self.data_dir = data_dir
 
     def _map_labels(self, example):
+        example["label_name"] = example["label"]
         label_map = {"BEZPIECZNE_POSTANOWIENIE_UMOWNE": 0, "KLAUZULA_ABUZYWNA": 1}
-        if isinstance(example["label"], str):
-            example["label"] = label_map.get(example["label"], -1)
+        val = example.get("label")
+
+        if isinstance(val, str):
+            s = val.strip()
+            if s.isdigit():
+              example["label"] = int(s)
+            else:
+              example["label"] = label_map.get(s, -1)
+        else:
+            example["label"] = -1
         return example
 
     def load_data(self, split="train"):
@@ -43,5 +52,6 @@ class UnfairClausesDataProvider:
 
         dataset = load_dataset("csv", data_files={split: filepath})[split]
         dataset = dataset.map(self._map_labels)
+        dataset = dataset.cast_column("label", Value("int32"))
 
         return dataset
