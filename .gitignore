@@ -7,3 +7,5 @@ final_model_large_optuna/
 best_model_base_optuna/
 best_model_large_optuna/
 
+best_model_*/
+large_results_optuna/
