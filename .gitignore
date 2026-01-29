@@ -2,3 +2,8 @@ __pycache__/
 .ipynb_checkpoints/
 data/
 .venv/
+final_model_base_optuna/
+final_model_large_optuna/
+best_model_base_optuna/
+best_model_large_optuna/
+
